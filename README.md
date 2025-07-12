@@ -10,6 +10,6 @@ Team:-
 
 1. Nitish Kumar Sah(iamnitishsah12@gmail.com)
 
-2. Sanchita Priyadarshinee()
+2. Sanchita Priyadarshinee(sanchitapriyadarshinee@gmail.com)
 
-3. Ch Gyaneshwar Rao()
+3. Ch Gyaneshwar Rao(chgyaneswar1971@gmail.com)
