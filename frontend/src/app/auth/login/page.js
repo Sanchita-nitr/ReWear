@@ -35,8 +35,6 @@ const Login = () => {
                 localStorage.setItem("refreshToken", data.refresh);
                 console.log("Token stored in localStorage:", data.access);
                 console.log("Login successful:", data);
-
-                // Fetch current user details and log them
                 try {
                     const userResponse = await fetch(
                         "http://127.0.0.1:8000/users/me/",
@@ -49,12 +47,12 @@ const Login = () => {
                     );
                     if (userResponse.ok) {
                         const user = await userResponse.json();
-                        router.push("/pages/dashboard");
+                        router.push("/pages/sell");
                         console.log("User details:", {
                             email: user.email,
                             firstName: user.first_name,
                             lastName: user.last_name,
-                            
+
                         });
                     } else {
                         setError("Failed to fetch user details");
@@ -64,7 +62,7 @@ const Login = () => {
                 }
             } else {
                 const data = await response.json();
-                setError(data.error || "Invalid email or password");
+                setError(data.error || data.detail || "Invalid email or password");
             }
         } catch {
             setError("An error occurred. Please try again.");
@@ -85,11 +83,12 @@ const Login = () => {
             }));
         };
 
-        setStars(generateStars(150)); // Generate stars only on the client side
+        setStars(generateStars(150));
     }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Stars Background */}
             <div className="fixed inset-0 pointer-events-none z-0">
                 {stars.map((star) => (
                     <div
@@ -145,7 +144,7 @@ const Login = () => {
                     </div>
 
                     {/* Form */}
-                    <div className="space-y-6">
+                    <form className="space-y-6" onSubmit={handleLogin}>
                         {/* Email Field */}
                         <div className="space-y-2">
                             <label
@@ -191,6 +190,7 @@ const Login = () => {
                                 />
                                 <button
                                     type="button"
+                                    tabIndex={-1}
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
                                 >
@@ -212,7 +212,8 @@ const Login = () => {
 
                         {/* Login Button */}
                         <button
-                            onClick={handleLogin}
+
+                            type="submit"
                             disabled={isLoading}
                             className="w-full bg-gradient-to-r from-cyan-500 to-emerald-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-cyan-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-cyan-500/20 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center group"
                         >
@@ -224,6 +225,17 @@ const Login = () => {
                                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                                 </>
                             )}
+                        </button>
+                    </form>
+
+                    {/* Forgot Password Link */}
+                    <div className="flex justify-end mt-2">
+                        <button
+                            type="button"
+                            onClick={() => router.push("/auth/forgotpassword")}
+                            className="text-sm text-cyan-400 hover:underline focus:outline-none"
+                        >
+                            Forgot Password?
                         </button>
                     </div>
 
@@ -241,14 +253,12 @@ const Login = () => {
 
                     {/* Sign Up Link */}
                     <button
+                        type="button"
                         onClick={() => router.push("/auth/signup")}
                         className="w-full bg-gray-800/50 border-2 border-gray-600 text-gray-300 font-semibold py-3 px-6 rounded-xl hover:bg-gray-700/50 hover:border-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-300 flex items-center justify-center group"
                     >
                         Create New Account
                         <Zap className="w-4 h-4 ml-2 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
-                    </button>
-                    <button onClick={() => router.push("/auth/forgotpassword")}>
-                        Forgot Password
                     </button>
                 </div>
 

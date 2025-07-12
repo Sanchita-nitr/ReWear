@@ -40,11 +40,11 @@ const Navbar = () => {
               <ShoppingBag className="w-5 h-5" />
             </button>
             <button 
-              onClick={() => router.push("/login")}
+              onClick={() => router.push("/auth/signup")}
               className="bg-gradient-to-r from-cyan-500 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-cyan-600 hover:to-emerald-700 transition-all"
             >
               <User className="w-4 h-4 inline mr-2" />
-              Login
+              Sign Up
             </button>
           </div>
 
