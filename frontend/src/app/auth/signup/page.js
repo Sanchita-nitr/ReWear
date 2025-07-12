@@ -27,7 +27,7 @@ const Signup = () => {
     });
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [countdown, setCountdown] = useState(0);
     const [stars, setStars] = useState([]);
@@ -147,16 +147,17 @@ const Signup = () => {
         setError("");
 
         // Validate password match
-        if (formData.password !== formData.password_confirm) {
-            setError("Passwords do not match");
-            setIsLoading(false);
-            return;
-        }
+
+        // if (formData.password !== formData.password_confirm) {
+        //     setError("Passwords do not match");
+        //     setIsLoading(false);
+        //     return;
+        // }
 
         // Validate WhatsApp number format (basic validation)
         const wpNumberRegex = /^\+?\d{10,15}$/;
         if (formData.number && !wpNumberRegex.test(formData.number)) {
-            setError("Invalid WhatsApp number format");
+            setError("Invalid number format");
             setIsLoading(false);
             return;
         }
@@ -480,7 +481,7 @@ const Signup = () => {
                             </div>
 
                             {/* Confirm Password */}
-                            <div className="space-y-2">
+                            {/* <div className="space-y-2">
                                 <label
                                     htmlFor="password_confirm"
                                     className="text-sm font-medium text-gray-300 flex items-center"
@@ -496,8 +497,14 @@ const Signup = () => {
                                         required
                                         value={formData.password_confirm}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all duration-300 backdrop-blur-sm pr-12"
-                                        placeholder="Confirm your password"
+                                        className={`w-full px-4 py-3 bg-gray-800/50 border-2 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-4 transition-all duration-300 backdrop-blur-sm pr-12
+                ${(formData.password_confirm || "").length > 0
+                                                ? passwordsMatch
+                                                    ? "border-green-500 focus:border-green-500 focus:ring-green-500/20"
+                                                    : "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                                                : "border-gray-600 focus:border-red-500/20"}
+
+            `} placeholder="Confirm your password"
                                     />
                                     <button
                                         type="button"
@@ -511,7 +518,14 @@ const Signup = () => {
                                         )}
                                     </button>
                                 </div>
-                            </div>
+
+                               {(formData.password_confirm || "").length > 0 && !passwordsMatch && (
+                                    <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
+                                )}
+                                {(formData.password_confirm || "").length > 0 && passwordsMatch && (
+                                    <p className="text-green-400 text-xs mt-1">Passwords match</p>
+                                )}
+                            </div> */}
 
                             {/* WhatsApp Number */}
                             <div className="space-y-2">
