@@ -1,12 +1,10 @@
-import Signup from "./auth/signup/page";
 
+import Landingpage from "./pages/Landingpage/page";
 
 export default function Home() {
   return (
-   
-      <div>
-       <Signup/>
-      </div>
-
+    <div>
+     <Landingpage/>
+    </div>
   );
 }
