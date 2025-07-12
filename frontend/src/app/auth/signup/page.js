@@ -520,7 +520,7 @@ const Signup = () => {
                                     className="text-sm font-medium text-gray-300 flex items-center"
                                 >
                                     <Phone className="w-4 h-4 mr-2 text-teal-400" />
-                                    WhatsApp Number
+                                    Number
                                 </label>
                                 <input
                                     type="tel"
@@ -529,7 +529,7 @@ const Signup = () => {
                                     value={formData.number}
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/20 transition-all duration-300 backdrop-blur-sm"
-                                    placeholder="10 digits WhatsApp number"
+                                    placeholder="10 digits number"
                                 />
                             </div>
                         </div>
