@@ -72,6 +72,7 @@ class User(AbstractUser):
     )
 
     is_verified = models.BooleanField(default=False)
+    points = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -1,9 +1,7 @@
 from django.db import models
 from django.conf import settings
-from taggit.managers import TaggableManager
 from cloudinary.models import CloudinaryField
 
-# Choice definitions
 CATEGORIES = [
     ('Tops', 'Tops'),
     ('Bottoms', 'Bottoms'),
@@ -65,11 +63,9 @@ STATUS_CHOICES = [
 class Item(models.Model):
     title        = models.CharField(max_length=200)
     description  = models.TextField(blank=True)
-    price        = models.DecimalField(max_digits=10, decimal_places=2)
+    points       = models.PositiveIntegerField()
     negotiable   = models.BooleanField(default=False)
-    tags         = TaggableManager(blank=True)
 
-    # Filters & categorizations
     category     = models.CharField(max_length=50, choices=CATEGORIES, default='Others')
     gender       = models.CharField(max_length=10, choices=GENDER_CHOICES, default='Unisex')
     size         = models.CharField(max_length=20, choices=SIZE_CHOICES, default='Free Size')

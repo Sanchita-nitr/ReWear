@@ -7,16 +7,15 @@ from .models import User, OTPVerification
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ('email', 'first_name', 'last_name', 'number', 'is_verified', 'is_staff', 'is_superuser')
+    list_display = ('email', 'first_name', 'last_name', 'number', 'is_verified', 'points', 'is_staff', 'is_superuser')
     list_filter = ('is_verified', 'is_staff', 'is_superuser', 'is_active')
     search_fields = ('email', 'first_name', 'last_name', 'number')
     ordering = ('-created_at',)
 
-    # Use email instead of username
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         (_('Personal info'), {
-            'fields': ('first_name', 'last_name', 'number')
+            'fields': ('first_name', 'last_name', 'number', 'points')
         }),
         (_('Permissions'), {
             'fields': ('is_active', 'is_verified', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
