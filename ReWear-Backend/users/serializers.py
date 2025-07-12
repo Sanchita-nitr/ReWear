@@ -83,21 +83,16 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
 
+
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
-        write_only=True, required=True,
-        style={'input_type': 'password'},
-        min_length=8
-    )
-    otp = serializers.CharField(
-        write_only=True, required=True,
-        max_length=6
+        write_only=True, required=True, style={'input_type': 'password'}, min_length=8
     )
 
     class Meta:
         model = User
         fields = [
-            'email', 'password', 'otp',
+            'email', 'password',
             'first_name', 'last_name',
             'number'
         ]
@@ -111,38 +106,30 @@ class UserCreateSerializer(serializers.ModelSerializer):
         email = value.lower()
         if not email.endswith('@gmail.com'):
             raise serializers.ValidationError('Only @gmail.com addresses are allowed.')
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError('A user with this email already exists.')
         return email
 
     def validate(self, data):
         email = data['email']
-        otp = data['otp']
         try:
-            otp_obj = OTPVerification.objects.get(email=email, otp=otp, is_verified=True)
+            otp_obj = OTPVerification.objects.get(
+                email=email, is_verified=True
+            )
         except OTPVerification.DoesNotExist:
-            raise serializers.ValidationError({'otp': 'Invalid or unverified OTP.'})
+            raise serializers.ValidationError({
+                'detail': 'Email not verified. Please verify via OTP first.'
+            })
 
         if otp_obj.is_expired():
             otp_obj.delete()
-            raise serializers.ValidationError({'otp': 'OTP has expired.'})
+            raise serializers.ValidationError({
+                'detail': 'Your OTP session has expired. Request a new one.'
+            })
 
-        data['otp_obj'] = otp_obj
         return data
 
     def create(self, validated_data):
-        # Remove OTP from user-creation payload
-        validated_data.pop('otp')
-        validated_data.pop('otp_obj')
-
-        email = validated_data['email']
         password = validated_data.pop('password')
-
-        user = User.objects.create_user(
-            email=email,
-            password=password,
-            **validated_data
-        )
+        user = User.objects.create_user(password=password, **validated_data)
         user.is_verified = True
         user.save(update_fields=['is_verified'])
         return user
