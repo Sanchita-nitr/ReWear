@@ -1,12 +1,11 @@
-import Login from "./auth/login";
-import Signup from "./auth/signup";
+import Signup from "./auth/signup/page";
+
 
 export default function Home() {
   return (
    
       <div>
-        <Login/>
-        <Signup/>
+       <Signup/>
       </div>
 
   );
