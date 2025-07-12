@@ -16,8 +16,6 @@ class OTPSendSerializer(serializers.Serializer):
         email = value.lower()
         if not email.endswith('@gmail.com'):
             raise serializers.ValidationError('Only @gmail.com addresses are allowed.')
-        if not User.objects.filter(email=email).exists():
-            raise serializers.ValidationError('No user found with this email address.')
         return email
 
     def create(self, validated_data):
