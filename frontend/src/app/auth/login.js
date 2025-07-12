@@ -19,7 +19,7 @@ const Login = () => {
 
         try {
             const response = await fetch(
-                "https://nitr-mart-production.up.railway.app/users/token/",
+                "http://127.0.0.1:8000/users/login/",
                 {
                     method: "POST",
                     headers: {
@@ -39,7 +39,7 @@ const Login = () => {
                 // Fetch current user details and log them
                 try {
                     const userResponse = await fetch(
-                        "https://nitr-mart-production.up.railway.app/users/me/",
+                        "http://127.0.0.1:8000/users/me/",
                         {
                             method: "GET",
                             headers: {
@@ -54,8 +54,7 @@ const Login = () => {
                             email: user.email,
                             firstName: user.first_name,
                             lastName: user.last_name,
-                            rollNo: user.roll_no,
-                            branch: user.branch,
+                            
                         });
                     } else {
                         setError("Failed to fetch user details");
