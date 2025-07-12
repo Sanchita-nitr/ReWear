@@ -184,30 +184,3 @@ Register a user using a previously verified OTP.
    ```python
    path("auth/", include("your_app.urls"))
    ```
-
----
-
-## 🧪 Testing with Postman
-
-### Sample Send OTP
-
-```json
-POST /auth/send-otp/
-{
-  "email": "example@gmail.com"
-}
-```
-
-### Sample Register User
-
-```json
-POST /auth/register/
-{
-  "email": "example@gmail.com",
-  "password": "pass123456",
-  "otp": "123456",
-  "first_name": "Test",
-  "last_name": "User",
-  "number": "9876543210"
-}
-```
