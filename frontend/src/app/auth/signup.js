@@ -2,39 +2,28 @@
 import {
     ArrowLeft,
     ArrowRight,
-    Building,
-    Calendar,
     Eye,
     EyeOff,
-    GraduationCap,
-    Hash,
     Lock,
     Mail,
     Phone,
     User,
-    UserPlus,
-    Users,
+    UserPlus
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Signup = () => {
     const router = useRouter();
-    const [step, setStep] = useState < "email" | "otp" | "form" > ("email");
+    const [step, setStep] = useState("email");
     const [email, setEmail] = useState("");
     const [otp, setOtp] = useState("");
     const [formData, setFormData] = useState({
         email: "",
         password: "",
-        password_confirm: "",
         first_name: "",
         last_name: "",
-        role: "student",
-        year: "",
-        branch: "",
-        department: "",
-        roll_no: "",
-        wp_number: "", // Added WhatsApp number field
+        number: "",
     });
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +62,7 @@ const Signup = () => {
         setError("");
 
         try {
-            const response = await fetch("https://nitr-mart-production.up.railway.app/users/send-otp/", {
+            const response = await fetch("http://127.0.0.1:8000/users/send-otp/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -102,7 +91,7 @@ const Signup = () => {
         setError("");
 
         try {
-            const response = await fetch("https://nitr-mart-production.up.railway.app/users/verify-otp/", {
+            const response = await fetch("http://127.0.0.1:8000/users/verify-otp/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -130,7 +119,7 @@ const Signup = () => {
         setError("");
 
         try {
-            const response = await fetch("https://nitr-mart-production.up.railway.app/users/send-otp/", {
+            const response = await fetch("http://127.0.0.1:8000/users/send-otp/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -166,14 +155,14 @@ const Signup = () => {
 
         // Validate WhatsApp number format (basic validation)
         const wpNumberRegex = /^\+?\d{10,15}$/;
-        if (formData.wp_number && !wpNumberRegex.test(formData.wp_number)) {
+        if (formData.number && !wpNumberRegex.test(formData.number)) {
             setError("Invalid WhatsApp number format");
             setIsLoading(false);
             return;
         }
 
         try {
-            const response = await fetch("https://nitr-mart-production.up.railway.app/users/", {
+            const response = await fetch("http://127.0.0.1:8000/users/register/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -527,7 +516,7 @@ const Signup = () => {
                             {/* WhatsApp Number */}
                             <div className="space-y-2">
                                 <label
-                                    htmlFor="wp_number"
+                                    htmlFor="number"
                                     className="text-sm font-medium text-gray-300 flex items-center"
                                 >
                                     <Phone className="w-4 h-4 mr-2 text-teal-400" />
@@ -535,21 +524,15 @@ const Signup = () => {
                                 </label>
                                 <input
                                     type="tel"
-                                    id="wp_number"
-                                    name="wp_number"
-                                    value={formData.wp_number}
+                                    id="number"
+                                    name="number"
+                                    value={formData.number}
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/20 transition-all duration-300 backdrop-blur-sm"
                                     placeholder="10 digits WhatsApp number"
                                 />
                             </div>
                         </div>
-
-                     
-
-                      
-                       
-
                         {/* Hidden OTP field */}
                         <input type="hidden" name="otp" value={otp} />
 
