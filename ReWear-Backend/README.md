@@ -1,13 +1,5 @@
-# ReWear
-Community Clothing Exchange
 
----
-
-## 🛡️ Django REST Auth API with OTP Verification
-
-A lightweight, OTP-based user authentication system using Django Rest Framework and a custom user model.
-
----
+# ReWear Backend API Documentation
 
 ### 📦 Features
 
@@ -17,6 +9,7 @@ A lightweight, OTP-based user authentication system using Django Rest Framework 
 * 🔄 Password update with current password
 * 🧍 Authenticated profile view and update
 * 🛂 Admin-only user listing
+* 🔑 JWT‑based login & token refresh
 
 ---
 
@@ -24,9 +17,7 @@ A lightweight, OTP-based user authentication system using Django Rest Framework 
 
 ### 📩 1. Send OTP
 
-**POST** `/auth/send-otp/`
-
-Send a 6-digit OTP to a registered user’s Gmail account.
+**POST** `/users/auth/send-otp/`
 
 #### Request Body
 
@@ -48,9 +39,7 @@ Send a 6-digit OTP to a registered user’s Gmail account.
 
 ### ✅ 2. Verify OTP
 
-**POST** `/auth/verify-otp/`
-
-Verify a previously sent OTP.
+**POST** `/users/auth/verify-otp/`
 
 #### Request Body
 
@@ -73,9 +62,7 @@ Verify a previously sent OTP.
 
 ### 📝 3. Register New User
 
-**POST** `/auth/register/`
-
-Register a user using a previously verified OTP.
+**POST** `/users/auth/register/`
 
 #### Request Body
 
@@ -100,16 +87,69 @@ Register a user using a previously verified OTP.
   "last_name": "Doe",
   "number": "9876543210",
   "is_verified": true,
-  ...
+  "created_at": "2025-07-12T12:00:00Z",
+  "updated_at": "2025-07-12T12:00:00Z",
+  "is_staff": false,
+  "is_superuser": false
 }
 ```
 
 ---
 
-### 👤 4. Get User Profile
+### 🔑 4. Login (JWT)
 
-**GET** `/auth/profile/`
-**Headers**: `Authorization: Bearer <access_token>`
+**POST** `/users/auth/login/`
+
+#### Request Body
+
+```json
+{
+  "email": "example@gmail.com",
+  "password": "yourpassword123"
+}
+```
+
+#### Response
+
+```json
+{
+  "refresh": "long-refresh-token",
+  "access": "short-access-token"
+}
+```
+
+---
+
+### 🔁 5. Refresh Token
+
+**POST** `/users/auth/token/refresh/`
+
+#### Request Body
+
+```json
+{
+  "refresh": "long-refresh-token"
+}
+```
+
+#### Response
+
+```json
+{
+  "access": "new-access-token"
+}
+```
+
+---
+
+### 👤 6. Get User Profile
+
+**GET** `/users/auth/me/`
+**Headers**:
+
+```
+Authorization: Bearer <access_token>
+```
 
 #### Response
 
@@ -121,16 +161,23 @@ Register a user using a previously verified OTP.
   "last_name": "Doe",
   "number": "9876543210",
   "is_verified": true,
-  ...
+  "created_at": "2025-07-12T12:00:00Z",
+  "updated_at": "2025-07-12T12:00:00Z",
+  "is_staff": false,
+  "is_superuser": false
 }
 ```
 
 ---
 
-### ✏️ 5. Update User Profile
+### ✏️ 7. Update User Profile
 
-**PATCH** `/auth/profile/`
-**Headers**: `Authorization: Bearer <access_token>`
+**PATCH** `/users/auth/me/`
+**Headers**:
+
+```
+Authorization: Bearer <access_token>
+```
 
 #### Update Name Example
 
@@ -151,36 +198,11 @@ Register a user using a previously verified OTP.
 
 ---
 
-### 🔐 6. List All Users (Admin Only)
+### 👥 8. List All Users (Admin Only)
 
-**GET** `/auth/users/`
-**Headers**: `Authorization: Bearer <admin_token>`
+**GET** `/users/auth/users/`
+**Headers**:
 
----
-
-## 📤 Sending OTP Email
-
-* HTML template: `templates/otp_email.html`
-* Subject: `"Your OTP for Verification"`
-* Expiry: configurable via `OTP_EXPIRY_MINUTES` in `settings.py` (default: 30 minutes)
-
----
-
-## ⚙️ Setup
-
-1. Set custom user model in `settings.py`:
-
-   ```python
-   AUTH_USER_MODEL = "your_app.User"
-   ```
-2. Add to `INSTALLED_APPS`:
-
-   ```python
-   'rest_framework',
-   'your_app',
-   ```
-3. Include URLs:
-
-   ```python
-   path("auth/", include("your_app.urls"))
-   ```
+```
+Authorization: Bearer <admin_access_token>
+```
