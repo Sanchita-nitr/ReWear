@@ -47,7 +47,7 @@ const Login = () => {
                     );
                     if (userResponse.ok) {
                         const user = await userResponse.json();
-                        router.push("/pages/sell");
+                        router.push("/pages/dashboard");
                         console.log("User details:", {
                             email: user.email,
                             firstName: user.first_name,

@@ -288,7 +288,7 @@ const WelcomePage = () => {
           </p>
           {/* Update hero section: remove two buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <button onClick={() => navigation("/auth/signup")} className="bg-gradient-to-r from-cyan-500 to-emerald-600 text-white font-semibold py-4 px-8 rounded-xl hover:from-cyan-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-cyan-500/20 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center group">
+            <button onClick={() => navigation("/auth/login")} className="bg-gradient-to-r from-cyan-500 to-emerald-600 text-white font-semibold py-4 px-8 rounded-xl hover:from-cyan-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-cyan-500/20 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center group">
               Start Swapping Clothes
             </button>
           </div>
