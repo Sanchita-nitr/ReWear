@@ -1,11 +1,22 @@
-import { useContext } from "react";
-import { Navigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+"use client";
+import { useContext, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { AuthContext } from "@/app/context/AuthContext";
 
-const ProtectedRoute = ({ children }) => {
-  const { token } = useContext(AuthContext);
-  localStorage.setItem("token", token);
-  return token ? children : <Navigate to="/pages/dashboard" />;
-};
+export default function ProtectedRoute({ children }) {
+  const { user } = useContext(AuthContext);
+  const router = useRouter();
 
-export default ProtectedRoute;
+  useEffect(() => {
+    if (user === null) {
+      router.replace("/pages/landingpage");
+    }
+  }, [user, router]);
+
+  if (!user) {
+    // Optionally show a loading spinner
+    return null;
+  }
+
+  return children;
+}

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useContext } from "react";
 import {
   ArrowRight,
   Bike,
@@ -19,16 +19,26 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+// import { AuthContext } from "@/app/context/AuthContext";
 import Footer from "@/app/components/footer/page";
 import Navbar from "@/app/components/navbar/page";
-
-const WelcomePage = () => {
+export default function LandingPage() {
+  // const { user } = useContext(AuthContext);
+  const router = useRouter();
   const [stars, setStars] = useState([]);
   // Set products to empty array (no listings)
   const [products, setProducts] = useState([]);
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+
+
+
+  // useEffect(() => {
+  //   if (!loading && user) {
+  //     router.replace("/pages/dashboard");
+  //   }
+  // }, [user, loading, router]);
 
   // Mock data for demonstration
   const mockProducts = [
@@ -140,7 +150,6 @@ const WelcomePage = () => {
       .filter((product) => product.category === categoryKey)
       .slice(0, 3);
   };
-  const router = useRouter();
   const navigation = (path) => {
     router.push(path);
   };
@@ -350,5 +359,3 @@ const WelcomePage = () => {
     </div>
   );
 };
-
-export default WelcomePage;
