@@ -148,7 +148,7 @@ const SellPage = () => {
                 },
                 body: JSON.stringify({
                     ...formData,
-                    points: parseInt(formData.points), // Convert to integer for points
+                    points: parseInt(formData.points),
                 }),
             });
 
@@ -157,13 +157,13 @@ const SellPage = () => {
                 setItemId(data.id);
                 setSuccessMessage("Item created successfully.");
                 console.log("Item created:", data);
-                router.push("/pages/landingpage");
+                router.push("/pages/dashboard");
   
                 if (imageFile) {
                     await uploadImage(data.id);
                 } else {
                     setTimeout(() => {
-                        router.push("/pages/landingpage");
+                        router.push("/pages/dashboard");
                     }, 1500);
                 }
             } else {

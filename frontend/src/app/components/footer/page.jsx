@@ -1,5 +1,6 @@
 "use client";
 import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from "lucide-react";
+import Link from "next/link";
 
 const Footer = () => {
   return (
@@ -77,18 +78,18 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2024 ReWear. All rights reserved.
+            © 2025 ReWear. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
+            <Link href="/pages/privacies" className="text-gray-400 hover:text-white text-sm transition-colors">
               Privacy Policy
-            </a>
-            <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
+            </Link>
+            <Link href="/pages/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
               Terms of Service
-            </a>
-            <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
+            </Link>
+            <Link href="/pages/cookie" className="text-gray-400 hover:text-white text-sm transition-colors">
               Cookie Policy
-            </a>
+            </Link>
           </div>
         </div>
       </div>
