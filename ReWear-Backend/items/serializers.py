@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Item, ItemImage
+from .models import Item, ItemImage, Like
 
 
 class ItemImageSerializer(serializers.ModelSerializer):
@@ -37,3 +37,9 @@ class ItemSerializer(serializers.ModelSerializer):
         if tag_names is not None:
             instance.tags.set(*tag_names)
         return instance
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ['id', 'user', 'item', 'created_at']

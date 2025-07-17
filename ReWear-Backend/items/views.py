@@ -1,6 +1,13 @@
-from rest_framework import viewsets, permissions, parsers, filters
-from .models import Item, ItemImage
+from rest_framework import viewsets, permissions, parsers, filters, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
+from .models import Item, ItemImage, Like
 from .serializers import ItemSerializer, ItemImageSerializer
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -19,6 +26,16 @@ class ItemViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(uploaded_by=self.request.user)
 
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
+        item = get_object_or_404(Item, pk=pk)
+        user = request.user
+        like, created = Like.objects.get_or_create(user=user, item=item)
+        if not created:
+            like.delete()
+            return Response({"status": "unliked"}, status=status.HTTP_200_OK)
+        return Response({"status": "liked"}, status=status.HTTP_201_CREATED)
+
 class ItemImageViewSet(viewsets.ModelViewSet):
     queryset = ItemImage.objects.all()
     serializer_class = ItemImageSerializer
@@ -28,3 +45,11 @@ class ItemImageViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         item_id = self.request.data.get('item')
         serializer.save(item_id=item_id)
+
+class LikedItemsList(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        liked_items = Item.objects.filter(likes__user=request.user)
+        serializer = ItemSerializer(liked_items, many=True)
+        return Response(serializer.data)

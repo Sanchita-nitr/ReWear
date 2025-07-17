@@ -26,7 +26,7 @@ export default function ProfessionalLandingPage() {
   const startJourney = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/auth/signup");
+      router.push("/auth/login");
       return;
     }
     try {
@@ -39,10 +39,10 @@ export default function ProfessionalLandingPage() {
       if (res.ok) {
         router.push("/pages/dashboard");
       } else {
-        router.push("/auth/signup");
+        router.push("/auth/login");
       }
     } catch (error) {
-      router.push("/auth/signup");
+      router.push("/auth/login");
     }
   };
 
@@ -151,11 +151,10 @@ export default function ProfessionalLandingPage() {
     <div className={`min-h-screen transition-all duration-300 ${themeClasses}`}>
       {/* Navigation */}
       <nav
-        className={`fixed top-0 w-full z-50 backdrop-blur-lg border-b transition-all duration-300 ${
-          isDarkMode
+        className={`fixed top-0 w-full z-50 backdrop-blur-lg border-b transition-all duration-300 ${isDarkMode
             ? "bg-gray-900/80 border-gray-700"
             : "bg-white/80 border-gray-200"
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -174,11 +173,10 @@ export default function ProfessionalLandingPage() {
                   <a
                     key={item.name}
                     href={item.href}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      activeSection === item.href.substring(1)
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeSection === item.href.substring(1)
                         ? "text-blue-600"
                         : `${textSecondary} hover:text-blue-600`
-                    }`}
+                      }`}
                   >
                     {item.name}
                   </a>
@@ -190,11 +188,10 @@ export default function ProfessionalLandingPage() {
             <div className="flex items-center space-x-4">
               <button
                 onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode
+                className={`p-2 rounded-lg transition-colors ${isDarkMode
                     ? "bg-gray-800 hover:bg-gray-700"
                     : "bg-gray-100 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {isDarkMode ? (
                   <Sun className="w-5 h-5" />
@@ -220,20 +217,18 @@ export default function ProfessionalLandingPage() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div
-            className={`md:hidden border-t ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            }`}
+            className={`md:hidden border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
           >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               {navigation.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                    activeSection === item.href.substring(1)
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${activeSection === item.href.substring(1)
                       ? "text-blue-600"
                       : `${textSecondary} hover:text-blue-600`
-                  }`}
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -270,11 +265,10 @@ export default function ProfessionalLandingPage() {
                 <ArrowRight className="w-5 h-5 ml-2 inline" />
               </button>
               <button
-                className={`border-2 px-8 py-4 rounded-lg font-semibold transition-all duration-300 ${
-                  isDarkMode
+                className={`border-2 px-8 py-4 rounded-lg font-semibold transition-all duration-300 ${isDarkMode
                     ? "border-gray-600 hover:border-blue-500 hover:bg-blue-500/10"
                     : "border-gray-300 hover:border-blue-500 hover:bg-blue-500/10"
-                }`}
+                  }`}
               >
                 Schedule Demo
               </button>
@@ -332,9 +326,8 @@ export default function ProfessionalLandingPage() {
             {solutions.map((solution, index) => (
               <div
                 key={index}
-                className={`relative p-8 rounded-xl border transition-all duration-300 hover:shadow-lg ${cardClasses} ${
-                  solution.popular ? "ring-2 ring-blue-500" : ""
-                }`}
+                className={`relative p-8 rounded-xl border transition-all duration-300 hover:shadow-lg ${cardClasses} ${solution.popular ? "ring-2 ring-blue-500" : ""
+                  }`}
               >
                 {solution.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -361,15 +354,13 @@ export default function ProfessionalLandingPage() {
                   ))}
                 </ul>
                 <button
-                  className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 ${
-                    solution.popular
+                  className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 ${solution.popular
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
-                      : `border-2 ${
-                          isDarkMode
-                            ? "border-gray-600 hover:border-blue-500"
-                            : "border-gray-300 hover:border-blue-500"
-                        }`
-                  }`}
+                      : `border-2 ${isDarkMode
+                        ? "border-gray-600 hover:border-blue-500"
+                        : "border-gray-300 hover:border-blue-500"
+                      }`
+                    }`}
                 >
                   Get Started
                 </button>
@@ -446,11 +437,10 @@ export default function ProfessionalLandingPage() {
               Contact Sales
             </button>
             <button
-              className={`border-2 px-8 py-4 rounded-lg font-semibold transition-all duration-300 ${
-                isDarkMode
+              className={`border-2 px-8 py-4 rounded-lg font-semibold transition-all duration-300 ${isDarkMode
                   ? "border-gray-600 hover:border-blue-500 hover:bg-blue-500/10"
                   : "border-gray-300 hover:border-blue-500 hover:bg-blue-500/10"
-              }`}
+                }`}
             >
               Try Free Demo
             </button>
@@ -472,9 +462,8 @@ export default function ProfessionalLandingPage() {
                 </div>
                 <button
                   onClick={() => setShowChatbot(false)}
-                  className={`p-1 rounded ${
-                    isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                  }`}
+                  className={`p-1 rounded ${isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                    }`}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -504,9 +493,8 @@ export default function ProfessionalLandingPage() {
 
       {/* Footer */}
       <footer
-        className={`border-t py-12 px-4 ${
-          isDarkMode ? "border-gray-700" : "border-gray-200"
-        }`}
+        className={`border-t py-12 px-4 ${isDarkMode ? "border-gray-700" : "border-gray-200"
+          }`}
       >
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
@@ -548,9 +536,8 @@ export default function ProfessionalLandingPage() {
             </div>
           </div>
           <div
-            className={`mt-8 pt-8 border-t text-center ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            } ${textSecondary}`}
+            className={`mt-8 pt-8 border-t text-center ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              } ${textSecondary}`}
           >
             <p>&copy; 2025 ReWear. All rights reserved.</p>
           </div>

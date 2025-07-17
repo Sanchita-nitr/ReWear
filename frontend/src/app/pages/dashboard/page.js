@@ -21,6 +21,9 @@ import {
   Star,
   Trash2,
   TrendingUp,
+  Moon,
+  Sun,
+  Boxes
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -41,33 +44,9 @@ export default function Dashboard() {
   const [sortOrder, setSortOrder] = useState("desc");
   const [filterStatus, setFilterStatus] = useState("all");
   const [messages, setMessages] = useState([]);
-  const [darkMode, setDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState();
+  const [likedProductIds, setLikedProductIds] = useState(new Set());
   const router = useRouter();
-
-  // Add startJourney function here
-  const startJourney = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/pages/signup");
-      return;
-    }
-    try {
-      const res = await fetch("http://127.0.0.1:8000/users/me/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (res.ok) {
-        router.push("/pages/dashboard");
-      } else {
-        router.push("/pages/signup");
-      }
-    } catch (error) {
-      router.push("/pages/signup");
-    }
-  };
-
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -118,6 +97,32 @@ export default function Dashboard() {
       "Content-Type": "application/json",
     };
   }, []);
+
+  // const handleLikeProduct = async (productId) => {
+  //   try {
+  //     const res = await fetch(`${API_BASE_URL}/items/items/${productId}/like/`, {
+  //       method: "POST",
+  //       headers: getAuthHeaders(),
+  //     });
+  //     if (res.ok) {
+  //       // Toggle liked state locally
+  //       setLikedProductIds((prev) => {
+  //         const newSet = new Set(prev);
+  //         if (newSet.has(productId)) {
+  //           newSet.delete(productId);
+  //         } else {
+  //           newSet.add(productId);
+  //         }
+  //         return newSet;
+  //       });
+  //       await refreshData();
+  //     } else {
+  //       console.error("Failed to like/unlike product");
+  //     }
+  //   } catch (err) {
+  //     console.error("Failed to like/unlike product:", err);
+  //   }
+  // };
 
   // Fetch user profile and stats
   const fetchUserProfile = useCallback(async () => {
@@ -279,23 +284,22 @@ export default function Dashboard() {
     return new Date(date).toLocaleDateString();
   };
 
-  // Handle product actions
-  // const handleLikeProduct = async (productId) => {
-  //   try {
-  //     const res = await fetch(
-  //       `${API_BASE_URL}/items/items/${productId}/like/`,
-  //       {
-  //         method: "POST",
-  //         headers: getAuthHeaders(),
-  //       }
-  //     );
-  //     if (res.ok) {
-  //       await refreshData();
-  //     }
-  //   } catch (err) {
-  //     console.error("Failed to like product:", err);
-  //   }
-  // };
+  const handleLikeProduct = async (productId) => {
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/items/items/${productId}/like/`,
+        {
+          method: "POST",
+          headers: getAuthHeaders(),
+        }
+      );
+      if (res.ok) {
+        await refreshData();
+      }
+    } catch (err) {
+      console.error("Failed to like product:", err);
+    }
+  };
 
   // const handleViewProduct = async (productId) => {
   //   try {
@@ -421,6 +425,7 @@ export default function Dashboard() {
       setRecentActivity(activity);
     }
   }, [userProducts, allProducts, calculateStats, generateRecentActivity]);
+  
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -428,25 +433,29 @@ export default function Dashboard() {
     router.push("/");
   };
 
+
+    useEffect(() => {
+    // Optional: check system preference
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setIsDarkMode(systemDark);
+  }, []);
+
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle("dark", !isDarkMode);
   };
 
-  // Theme classes
+  // Theme classes (simplified as Tailwind's dark mode utility classes will handle most of it)
   const themeClasses = {
-    bg: darkMode ? "bg-gray-900" : "bg-gray-100",
-    cardBg: darkMode ? "bg-gray-800" : "bg-white",
-    text: darkMode ? "text-white" : "text-gray-900",
-    textSecondary: darkMode ? "text-gray-300" : "text-gray-600",
-    textMuted: darkMode ? "text-gray-400" : "text-gray-500",
-    border: darkMode ? "border-gray-700" : "border-gray-200",
-    hover: darkMode ? "hover:bg-gray-700" : "hover:bg-gray-50",
-    accent: darkMode
-      ? "bg-gradient-to-r from-purple-600 to-blue-600"
-      : "bg-gradient-to-r from-blue-500 to-purple-500",
-    accentSecondary: darkMode
-      ? "bg-gradient-to-r from-emerald-600 to-teal-600"
-      : "bg-gradient-to-r from-emerald-500 to-teal-500",
+    bg: "bg-gray-100 dark:bg-gray-900",
+    cardBg: "bg-white dark:bg-gray-800",
+    text: "text-gray-900 dark:text-white",
+    textSecondary: "text-gray-600 dark:text-gray-300",
+    textMuted: "text-gray-500 dark:text-gray-400",
+    border: "border-gray-200 dark:border-gray-700",
+    hover: "hover:bg-gray-50 dark:hover:bg-gray-700",
+    accent: "bg-gradient-to-r from-blue-500 to-purple-500 dark:from-purple-600 dark:to-blue-600",
+    accentSecondary: "bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600",
   };
 
   if (isLoading) {
@@ -533,7 +542,7 @@ export default function Dashboard() {
                   onClick={toggleDarkMode}
                   className={`p-3 ${themeClasses.cardBg} ${themeClasses.border} border rounded-lg ${themeClasses.hover} transition-colors`}
                 >
-                  {darkMode ? (
+                  {isDarkMode ? (
                     <Sun className="w-5 h-5 text-yellow-500" />
                   ) : (
                     <Moon className="w-5 h-5 text-gray-700" />
@@ -785,23 +794,23 @@ export default function Dashboard() {
                   <div className="space-y-4">
                     <button
                       onClick={() => router.push("/pages/sell")}
-                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-purple-300 ${themeClasses.hover} transition-all group`}
+                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-purple-300 dark:border-purple-700 ${themeClasses.hover} transition-all group`}
                     >
                       <div className="flex items-center space-x-3">
-                        <Plus className="w-5 h-5 text-purple-500" />
+                        <Plus className="w-5 h-5 text-purple-500 dark:text-purple-400" />
                         <span className={`${themeClasses.text} font-medium`}>
                           Create New Listing
                         </span>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-purple-500 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:translate-x-1 transition-transform" />
                     </button>
 
                     <button
                       onClick={() => setActiveTab("marketplace")}
-                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-blue-300 ${themeClasses.hover} transition-all group`}
+                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-blue-300 dark:border-blue-700 ${themeClasses.hover} transition-all group`}
                     >
                       <div className="flex items-center space-x-3">
-                        <Search className="w-5 h-5 text-blue-500" />
+                        <Search className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                         <span className={`${themeClasses.text} font-medium`}>
                           Browse Marketplace
                         </span>
@@ -813,15 +822,15 @@ export default function Dashboard() {
 
                     <button
                       onClick={() => setActiveTab("activity")}
-                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-emerald-300 ${themeClasses.hover} transition-all group`}
+                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-emerald-300 dark:border-emerald-700 ${themeClasses.hover} transition-all group`}
                     >
                       <div className="flex items-center space-x-3">
-                        <TrendingUp className="w-5 h-5 text-emerald-500" />
+                        <TrendingUp className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
                         <span className={`${themeClasses.text} font-medium`}>
                           View Analytics
                         </span>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-emerald-500 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -840,7 +849,7 @@ export default function Dashboard() {
                           <div className="relative">
                             <img
                               src={
-                                product.image_url ||
+                                (product.images && product.images.length > 0 && product.images[0].image) ||
                                 "https://via.placeholder.com/300"
                               }
                               alt={product.title}
@@ -921,7 +930,7 @@ export default function Dashboard() {
                             <div className="flex space-x-2">
                               <button
                                 onClick={() =>
-                                  console.log("Edit product", product.id)
+                                  router.push(`/pages/updateproduct/${product.id}`)
                                 }
                                 className={`flex-1 ${themeClasses.cardBg} ${themeClasses.border} border ${themeClasses.hover} ${themeClasses.text} py-2 rounded-md text-sm transition-colors flex items-center justify-center`}
                               >
@@ -931,14 +940,14 @@ export default function Dashboard() {
                               <button
                                 onClick={() => setIsLiked(!isLiked)}
                                 className={`p-2 rounded-full transition-all ${
-                                  isLiked
+                                  likedProductIds.has(product.id)
                                     ? "bg-red-500/20 text-red-400"
                                     : `${themeClasses.cardBg} ${themeClasses.textMuted} hover:text-red-400`
                                 }`}
                               >
                                 <Heart
                                   className={`w-5 h-5 ${
-                                    isLiked ? "fill-current" : ""
+                                    likedProductIds.has(product.id) ? "fill-current" : ""
                                   }`}
                                 />
                               </button>
@@ -1104,7 +1113,7 @@ export default function Dashboard() {
                         <div className="relative">
                           <img
                             src={
-                              product.image_url ||
+                              (product.images && product.images.length > 0 && product.images[0].image) ||
                               "https://via.placeholder.com/300"
                             }
                             alt={product.title}

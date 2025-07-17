@@ -228,7 +228,7 @@ const SellPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black relative">
+        <div className="min-h-screen bg-gradient-to-b from-gray-950 to-purple-950 relative">
             {/* Animated Star Background */}
             <div className="fixed inset-0 pointer-events-none z-0">
                 {stars.map((star) => (
@@ -260,8 +260,8 @@ const SellPage = () => {
 
             {/* Floating Accent Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-20 left-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-xl animate-pulse" />
-                <div className="absolute top-60 right-20 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: "1s" }} />
+                <div className="absolute top-20 left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-xl animate-pulse" />
+                <div className="absolute top-60 right-20 w-24 h-24 bg-blue-500/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: "1s" }} />
                 <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: "2s" }} />
                 <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-pink-500/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: "3s" }} />
             </div>
@@ -270,7 +270,7 @@ const SellPage = () => {
                 <div className="max-w-5xl mx-auto">
                     {/* Header */}
                     <div className="text-center mb-12">
-                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-b from-cyan-400 to-emerald-600 rounded-2xl mb-6 shadow-2xl">
+                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-b from-purple-950 to-blue-950 rounded-2xl mb-6 shadow-2xl">
                             <Shirt className="w-10 h-10 text-white" />
                         </div>
                         <h1 className="text-5xl font-black bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-3">
@@ -282,10 +282,10 @@ const SellPage = () => {
                     </div>
 
                     {/* Main Container */}
-                    <div className="bg-gray-900/50 backdrop-blur-xl rounded-3xl border border-gray-700/50 shadow-2xl overflow-hidden">
-                        <div className="bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 p-6 border-b border-gray-700/50">
+                    <div className="bg-gradient-to-t from-gray-950 to-gray-950/50 backdrop-blur-xl rounded-3xl border border-gray-700 shadow-2xl overflow-hidden">
+                        <div className="bg-gradient-to-tl from-purple-950 to-gray-950 p-6 border-b border-gray-700/50">
                             <h2 className="text-2xl font-bold text-white flex items-center">
-                                <ShoppingCart className="w-6 h-6 mr-3 text-cyan-400" />
+                                <ShoppingCart className="w-6 h-6 mr-3 text-purple-400" />
                                 List Your Fashion Item
                             </h2>
                             <p className="text-gray-400 mt-1">
@@ -405,7 +405,7 @@ const SellPage = () => {
                                     {/* Gender */}
                                     <div className="space-y-2">
                                         <label className="text-white font-semibold text-lg flex items-center">
-                                            <User className="w-5 h-5 mr-2 text-blue-400" />
+                                            <User  className="w-5 h-5 mr-2 text-blue-400" />
                                             Gender
                                         </label>
                                         <select
@@ -561,7 +561,7 @@ const SellPage = () => {
                                     disabled={isSubmitting}
                                     className={`w-full py-4 px-8 rounded-xl font-bold text-lg transition-all duration-300 transform ${isSubmitting
                                         ? "bg-gray-600 cursor-not-allowed"
-                                        : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] shadow-lg"
+                                        : "bg-gradient-to-t from-purple-800 to-gray-950 hover:from-purple-600 hover:to-purple-900 hover:shadow-xl shadow-lg"
                                         } text-white`}
                                 >
                                     {isSubmitting ? (
