@@ -1,5 +1,4 @@
 "use client";
-import ProtectedRoute from "@/app/components/ProtectedRoute";
 import Footer from "@/app/components/footer/page.jsx";
 import Navbar from "@/app/components/navbar/page.jsx";
 import {
@@ -23,13 +22,12 @@ import {
   Trash2,
   TrendingUp,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-const Dashboard = () => {
+export default function Dashboard() {
   const [user, setUser] = useState(null);
-   const [showShareModal, setShowShareModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [products, setProducts] = useState([]);
@@ -43,7 +41,32 @@ const Dashboard = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const [filterStatus, setFilterStatus] = useState("all");
   const [messages, setMessages] = useState([]);
+  const [darkMode, setDarkMode] = useState(false);
   const router = useRouter();
+
+  // Add startJourney function here
+  const startJourney = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/pages/signup");
+      return;
+    }
+    try {
+      const res = await fetch("http://127.0.0.1:8000/users/me/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.ok) {
+        router.push("/pages/dashboard");
+      } else {
+        router.push("/pages/signup");
+      }
+    } catch (error) {
+      router.push("/pages/signup");
+    }
+  };
 
   const handleShare = () => {
     if (navigator.share) {
@@ -57,19 +80,30 @@ const Dashboard = () => {
     }
   };
 
- 
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setShowShareModal(false);
+  };
+
   const shareToSocial = (platform) => {
     const url = window.location.href;
-    const text = `Check out this ${product?.title || 'product'}!`;
+    const text = `Check out this ${product?.title || "product"}!`;
 
     const shareUrls = {
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
-      instagram: `https://www.instagram.com/` // Instagram doesn't support direct sharing
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+        url
+      )}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+        url
+      )}&text=${encodeURIComponent(text)}`,
+      instagram: `https://www.instagram.com/`,
+      whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(
+        text
+      )} ${encodeURIComponent(url)}`,
     };
 
     if (shareUrls[platform]) {
-      window.open(shareUrls[platform], '_blank');
+      window.open(shareUrls[platform], "_blank");
     }
     setShowShareModal(false);
   };
@@ -156,7 +190,6 @@ const Dashboard = () => {
       .filter((p) => p.status === "sold")
       .reduce((sum, p) => sum + (p.points || 0), 0);
 
-    // Calculate average rating
     const ratedProducts = userProducts.filter((p) => p.rating && p.rating > 0);
     const averageRating =
       ratedProducts.length > 0
@@ -181,25 +214,22 @@ const Dashboard = () => {
     const activities = [];
 
     userProducts.forEach((product) => {
-      // Recently created items
       const createdDate = new Date(product.created_at);
       const now = new Date();
       const timeDiff = now - createdDate;
       const hoursDiff = timeDiff / (1000 * 60 * 60);
 
       if (hoursDiff < 168) {
-        // Within last week
         activities.push({
           id: `created_${product.id}`,
           type: "listing_created",
           title: `New listing: ${product.title}`,
           time: formatTimeAgo(createdDate),
-          icon: <Plus className="w-4 h-4 text-green-400" />,
+          icon: <Plus className="w-4 h-4 text-emerald-400" />,
           product: product,
         });
       }
 
-      // Recently sold items
       if (product.status === "sold" && product.sold_at) {
         const soldDate = new Date(product.sold_at);
         const soldHoursDiff = (now - soldDate) / (1000 * 60 * 60);
@@ -210,13 +240,12 @@ const Dashboard = () => {
             type: "item_sold",
             title: `${product.title} sold for ₹${product.points}`,
             time: formatTimeAgo(soldDate),
-            icon: <DollarSign className="w-4 h-4 text-emerald-400" />,
+            icon: <DollarSign className="w-4 h-4 text-green-400" />,
             product: product,
           });
         }
       }
 
-      // High engagement items
       if (product.views > 10 || product.likes > 5) {
         activities.push({
           id: `engagement_${product.id}`,
@@ -231,7 +260,6 @@ const Dashboard = () => {
       }
     });
 
-    // Sort by most recent and limit to 10
     return activities
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
@@ -252,65 +280,68 @@ const Dashboard = () => {
   };
 
   // Handle product actions
-  const handleLikeProduct = async (productId) => {
-    try {
-      const res = await fetch(
-        `${API_BASE_URL}/items/items/${productId}/like/`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(),
-        }
-      );
-      if (res.ok) {
-        await refreshData();
-      }
-    } catch (err) {
-      console.error("Failed to like product:", err);
-    }
-  };
+  // const handleLikeProduct = async (productId) => {
+  //   try {
+  //     const res = await fetch(
+  //       `${API_BASE_URL}/items/items/${productId}/like/`,
+  //       {
+  //         method: "POST",
+  //         headers: getAuthHeaders(),
+  //       }
+  //     );
+  //     if (res.ok) {
+  //       await refreshData();
+  //     }
+  //   } catch (err) {
+  //     console.error("Failed to like product:", err);
+  //   }
+  // };
 
-  const handleViewProduct = async (productId) => {
-    try {
-      await fetch(`${API_BASE_URL}/items/items/${productId}/view/`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-      });
-      await refreshData();
-    } catch (err) {
-      console.error("Failed to record view:", err);
-    }
-  };
+  // const handleViewProduct = async (productId) => {
+  //   try {
+  //     await fetch(`${API_BASE_URL}/items/items/${productId}/view/`, {
+  //       method: "POST",
+  //       headers: getAuthHeaders(),
+  //     });
+  //     await refreshData();
+  //   } catch (err) {
+  //     console.error("Failed to record view:", err);
+  //   }
+  // };
 
-  const handleRateProduct = async (productId, rating) => {
-    try {
-      const res = await fetch(
-        `${API_BASE_URL}/items/items/${productId}/rate/`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ rating }),
-        }
-      );
-      if (res.ok) {
-        await refreshData();
-      }
-    } catch (error) {
-      console.error("Failed to rate product:");
-    }
-  };
+  //  const handleRateProduct = async (productId, rating) => {
+  //   try {
+  //     const res = await fetch(
+  //       `${API_BASE_URL}/items/items/${productId}/rate/`,
+  //       {
+  //         method: "POST",
+  //         headers: getAuthHeaders(),
+  //         body: JSON.stringify({ rating }),
+  //       }
+  //     );
+  //     if (res.ok) {
+  //       await refreshData();
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to rate product:");
+  //   }
+  // };
 
   const handleDeleteProduct = async (productId) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/items/items/${productId}/`, {
-          method: "DELETE",
-          headers: getAuthHeaders(),
-        });
-        if (res.ok) {
-          await refreshData();
+    const token = localStorage.getItem("token");
+    if (token) {
+      if (window.confirm("Are you sure you want to delete this product?")) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/items/items/${productId}/`, {
+            method: "DELETE",
+            headers: getAuthHeaders(),
+          });
+          if (res.ok) {
+            await refreshData();
+          }
+        } catch (err) {
+          console.error("Failed to delete product:", err);
         }
-      } catch (err) {
-        console.error("Failed to delete product:", err);
       }
     }
   };
@@ -353,7 +384,6 @@ const Dashboard = () => {
       }
     });
   };
-
   // Initial data fetch
   useEffect(() => {
     const initializeData = async () => {
@@ -391,7 +421,6 @@ const Dashboard = () => {
       setRecentActivity(activity);
     }
   }, [userProducts, allProducts, calculateStats, generateRecentActivity]);
-
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -399,13 +428,37 @@ const Dashboard = () => {
     router.push("/");
   };
 
-  // Loading state
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  // Theme classes
+  const themeClasses = {
+    bg: darkMode ? "bg-gray-900" : "bg-gray-100",
+    cardBg: darkMode ? "bg-gray-800" : "bg-white",
+    text: darkMode ? "text-white" : "text-gray-900",
+    textSecondary: darkMode ? "text-gray-300" : "text-gray-600",
+    textMuted: darkMode ? "text-gray-400" : "text-gray-500",
+    border: darkMode ? "border-gray-700" : "border-gray-200",
+    hover: darkMode ? "hover:bg-gray-700" : "hover:bg-gray-50",
+    accent: darkMode
+      ? "bg-gradient-to-r from-purple-600 to-blue-600"
+      : "bg-gradient-to-r from-blue-500 to-purple-500",
+    accentSecondary: darkMode
+      ? "bg-gradient-to-r from-emerald-600 to-teal-600"
+      : "bg-gradient-to-r from-emerald-500 to-teal-500",
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
+      <div
+        className={`min-h-screen ${themeClasses.bg} flex items-center justify-center`}
+      >
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading your dashboard...</p>
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <p className={`${themeClasses.textMuted} text-lg`}>
+            Loading your dashboard...
+          </p>
         </div>
       </div>
     );
@@ -413,12 +466,16 @@ const Dashboard = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
+      <div
+        className={`min-h-screen ${themeClasses.bg} flex items-center justify-center`}
+      >
         <div className="text-center">
-          <p className="text-gray-400 mb-4">Unable to load user data</p>
+          <p className={`${themeClasses.textMuted} mb-4 text-lg`}>
+            Unable to load user data
+          </p>
           <button
             onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-colors"
           >
             Return to Login
           </button>
@@ -429,170 +486,255 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+      <div
+        className={`min-h-screen ${themeClasses.bg} transition-colors duration-300`}
+      >
         <Navbar />
 
-        {/* Back Button */}
-        <div className="pt-20 px-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={refreshData}
-              disabled={refreshing}
-              className="flex items-center text-gray-400 hover:text-white transition-colors mb-6"
-            >
-              <RefreshCw
-                className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
-              />
-              {refreshing ? "Refreshing..." : "Refresh"}
-            </button>
-          </div>
-        </div>
+        {/* Main Content */}
+        <div className="pt-20">
+          {/* Header Section */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+              {/* User Profile Card */}
+              <div
+                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg backdrop-blur-sm`}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-xl">
+                        {user.firstName?.charAt(0) || ""}
+                        {user.lastName?.charAt(0) || ""}
+                      </span>
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
+                  </div>
+                  <div>
+                    <h2
+                      className={`${themeClasses.text} text-xl font-semibold`}
+                    >
+                      {user.firstName} {user.lastName}
+                    </h2>
+                    <p className={`${themeClasses.textSecondary} text-sm`}>
+                      {user.email}
+                    </p>
+                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
+                      Member since{" "}
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <div className="flex items-center space-x-4 mb-4 md:mb-0">
-              <div className="flex items-center space-x-4 bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl px-5 py-2 border border-cyan-500/50 shadow-xl shadow-cyan-500/20 hover:ring-2 hover:ring-cyan-400/40 transition duration-200">
-                <div className="relative w-12 h-12 bg-gradient-to-tr from-cyan-400 to-green-600 rounded-lg flex items-center justify-center border border-cyan-300/60 shadow-lg shadow-cyan-400/40">
-                  <span className="text-sm font-bold text-white z-10">
-                    {user.firstName?.charAt(0) || ""}
-                    {user.lastName?.charAt(0) || ""}
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={toggleDarkMode}
+                  className={`p-3 ${themeClasses.cardBg} ${themeClasses.border} border rounded-lg ${themeClasses.hover} transition-colors`}
+                >
+                  {darkMode ? (
+                    <Sun className="w-5 h-5 text-yellow-500" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-gray-700" />
+                  )}
+                </button>
+
+                <button
+                  onClick={refreshData}
+                  disabled={refreshing}
+                  className={`flex items-center px-4 py-2 ${themeClasses.cardBg} ${themeClasses.border} border rounded-lg ${themeClasses.hover} transition-colors`}
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${
+                      refreshing ? "animate-spin" : ""
+                    }`}
+                  />
+                  <span className={themeClasses.text}>
+                    {refreshing ? "Refreshing..." : "Refresh"}
                   </span>
-                </div>
-                <div className="text-cyan-300 text-sm font-semibold tracking-wide">
-                  {user.firstName} {user.lastName}
-                  <p className="text-gray-300 font-sans">{user.email}</p>
-                  <p className="text-gray-400 text-xs">
-                    Member since {new Date(user.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={() => router.push("/pages/sell")}
-                className="bg-gradient-to-r from-cyan-500 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-cyan-600 hover:to-emerald-700 transition-all flex items-center"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Listing
-              </button>
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </button>
-            </div>
-          </div>
+                </button>
 
-          {/* Enhanced Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Active Listings</p>
-                  <p className="text-2xl font-bold text-white">
-                    {stats.activeListings || 0}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    of {stats.totalListings || 0} total
-                  </p>
-                </div>
-                <ShoppingBag className="w-8 h-8 text-cyan-400" />
-              </div>
-            </div>
+                <button
+                  onClick={() => router.push("/pages/sell")}
+                  className={`${themeClasses.accent} text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all flex items-center`}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Listing
+                </button>
 
-            <div className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Total Views</p>
-                  <p className="text-2xl font-bold text-white">
-                    {stats.totalViews || 0}
-                  </p>
-                  <p className="text-xs text-gray-500">across all listings</p>
-                </div>
-                <Eye className="w-8 h-8 text-emerald-400" />
-              </div>
-            </div>
-
-            <div className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Total Likes</p>
-                  <p className="text-2xl font-bold text-white">
-                    {stats.totalLikes || 0}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Rating: {stats.averageRating || 0}★
-                  </p>
-                </div>
-                <Heart className="w-8 h-8 text-pink-400" />
-              </div>
-            </div>
-
-            <div className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Total Earnings</p>
-                  <p className="text-2xl font-bold text-white">
-                    ₹{stats.totalEarnings?.toLocaleString() || 0}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {stats.soldListings || 0} items sold
-                  </p>
-                </div>
-                <DollarSign className="w-8 h-8 text-yellow-400" />
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg transition-colors flex items-center"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="flex space-x-1 bg-gray-800/50 rounded-lg p-1 mb-8">
-            {[
-              {
-                id: "overview",
-                label: "Overview",
-                icon: <TrendingUp className="w-4 h-4" />,
-              },
-              {
-                id: "listings",
-                label: "My Listings",
-                icon: <Package className="w-4 h-4" />,
-              },
-              {
-                id: "marketplace",
-                label: "Marketplace",
-                icon: <ShoppingBag className="w-4 h-4" />,
-              },
-              {
-                id: "activity",
-                label: "Activity",
-                icon: <Calendar className="w-4 h-4" />,
-              },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
-                  activeTab === tab.id
-                    ? "bg-cyan-500 text-white"
-                    : "text-gray-400 hover:text-white hover:bg-gray-700/50"
-                }`}
+          {/* Stats Grid */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div
+                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
               >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p
+                      className={`${themeClasses.textMuted} text-sm font-medium`}
+                    >
+                      Active Listings
+                    </p>
+                    <p
+                      className={`${themeClasses.text} text-3xl font-bold mt-2`}
+                    >
+                      {stats.activeListings || 0}
+                    </p>
+                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
+                      of {stats.totalListings || 0} total
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                    <ShoppingBag className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p
+                      className={`${themeClasses.textMuted} text-sm font-medium`}
+                    >
+                      Total Views
+                    </p>
+                    <p
+                      className={`${themeClasses.text} text-3xl font-bold mt-2`}
+                    >
+                      {stats.totalViews || 0}
+                    </p>
+                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
+                      across all listings
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+                    <Eye className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p
+                      className={`${themeClasses.textMuted} text-sm font-medium`}
+                    >
+                      Total Likes
+                    </p>
+                    <p
+                      className={`${themeClasses.text} text-3xl font-bold mt-2`}
+                    >
+                      {stats.totalLikes || 0}
+                    </p>
+                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
+                      Rating: {stats.averageRating || 0}★
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg flex items-center justify-center">
+                    <Heart className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p
+                      className={`${themeClasses.textMuted} text-sm font-medium`}
+                    >
+                      Total Earnings
+                    </p>
+                    <p
+                      className={`${themeClasses.text} text-3xl font-bold mt-2`}
+                    >
+                      ₹{stats.totalEarnings?.toLocaleString() || 0}
+                    </p>
+                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
+                      {stats.soldListings || 0} items sold
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+            <div
+              className={`${themeClasses.cardBg} rounded-2xl p-2 ${themeClasses.border} border shadow-lg`}
+            >
+              <nav className="flex space-x-2">
+                {[
+                  {
+                    id: "overview",
+                    label: "Overview",
+                    icon: <TrendingUp className="w-4 h-4" />,
+                  },
+                  {
+                    id: "listings",
+                    label: "My Listings",
+                    icon: <Package className="w-4 h-4" />,
+                  },
+                  {
+                    id: "marketplace",
+                    label: "Marketplace",
+                    icon: <ShoppingBag className="w-4 h-4" />,
+                  },
+                  {
+                    id: "activity",
+                    label: "Activity",
+                    icon: <Calendar className="w-4 h-4" />,
+                  },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-all font-medium ${
+                      activeTab === tab.id
+                        ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
+                        : `${themeClasses.text} ${themeClasses.hover}`
+                    }`}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
           </div>
 
           {/* Tab Content */}
-          <div className="space-y-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
             {activeTab === "overview" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Recent Activity */}
-                <div className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-xl p-6">
-                  <h3 className="text-xl font-semibold mb-4 flex items-center">
+                <div
+                  className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
+                >
+                  <h3
+                    className={`${themeClasses.text} text-xl font-semibold mb-6 flex items-center`}
+                  >
                     <Clock className="w-5 h-5 mr-2" />
                     Recent Activity
                   </h3>
@@ -601,16 +743,18 @@ const Dashboard = () => {
                       recentActivity.map((activity) => (
                         <div
                           key={activity.id}
-                          className="flex items-start space-x-3 p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors"
+                          className={`flex items-start space-x-3 p-4 rounded-lg ${themeClasses.hover} transition-colors`}
                         >
                           <div className="flex-shrink-0 mt-1">
                             {activity.icon}
                           </div>
                           <div className="flex-1">
-                            <p className="text-white font-medium">
+                            <p className={`${themeClasses.text} font-medium`}>
                               {activity.title}
                             </p>
-                            <p className="text-gray-400 text-sm">
+                            <p
+                              className={`${themeClasses.textMuted} text-sm mt-1`}
+                            >
                               {activity.time}
                             </p>
                           </div>
@@ -618,255 +762,245 @@ const Dashboard = () => {
                       ))
                     ) : (
                       <div className="text-center py-8">
-                        <Clock className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-                        <p className="text-gray-400">No recent activity</p>
+                        <Clock
+                          className={`w-12 h-12 ${themeClasses.textMuted} mx-auto mb-3`}
+                        />
+                        <p className={themeClasses.textMuted}>
+                          No recent activity
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-xl p-6">
-                  <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
-                  <div className="grid grid-cols-1 gap-3">
+                <div
+                  className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
+                >
+                  <h3
+                    className={`${themeClasses.text} text-xl font-semibold mb-6`}
+                  >
+                    Quick Actions
+                  </h3>
+                  <div className="space-y-4">
                     <button
                       onClick={() => router.push("/pages/sell")}
-                      className="flex items-center justify-between p-4 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 border border-cyan-500/30 rounded-lg hover:from-cyan-500/30 hover:to-emerald-500/30 transition-all"
+                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-purple-300 ${themeClasses.hover} transition-all group`}
                     >
                       <div className="flex items-center space-x-3">
-                        <Plus className="w-5 h-5 text-cyan-400" />
-                        <span>Create New Listing</span>
+                        <Plus className="w-5 h-5 text-purple-500" />
+                        <span className={`${themeClasses.text} font-medium`}>
+                          Create New Listing
+                        </span>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-gray-400" />
+                      <ArrowRight className="w-4 h-4 text-purple-500 group-hover:translate-x-1 transition-transform" />
                     </button>
 
                     <button
                       onClick={() => setActiveTab("marketplace")}
-                      className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg hover:from-purple-500/30 hover:to-pink-500/30 transition-all"
+                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-blue-300 ${themeClasses.hover} transition-all group`}
                     >
                       <div className="flex items-center space-x-3">
-                        <Search className="w-5 h-5 text-purple-400" />
-                        <span>Browse Marketplace</span>
+                        <Search className="w-5 h-5 text-blue-500" />
+                        <span className={`${themeClasses.text} font-medium`}>
+                          Browse Marketplace
+                        </span>
                       </div>
-                      <span className="text-xs bg-purple-500/20 px-2 py-1 rounded">
+                      <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
                         {stats.marketplaceItems || 0} items
                       </span>
                     </button>
 
                     <button
                       onClick={() => setActiveTab("activity")}
-                      className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-lg hover:from-orange-500/30 hover:to-red-500/30 transition-all"
+                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-emerald-300 ${themeClasses.hover} transition-all group`}
                     >
                       <div className="flex items-center space-x-3">
-                        <TrendingUp className="w-5 h-5 text-orange-400" />
-                        <span>View Analytics</span>
+                        <TrendingUp className="w-5 h-5 text-emerald-500" />
+                        <span className={`${themeClasses.text} font-medium`}>
+                          View Analytics
+                        </span>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-gray-400" />
+                      <ArrowRight className="w-4 h-4 text-emerald-500 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
                 </div>
               </div>
             )}
-
-            {/* Enhanced product listings section */}
-            {getSortedAndFilteredProducts(userProducts, true).length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getSortedAndFilteredProducts(userProducts, true).map(
-                  (product) => (
-                    <div
-                      key={product.id}
-                      className="bg-gray-700/30 rounded-xl overflow-hidden border border-gray-600/50 hover:border-cyan-500/50 transition-all group"
-                    >
-                      <div className="relative">
-                        <Link href={`/pages/productdetails/${product.id}`}>
-                          <img
-                            src={
-                              product.image_url ||
-                              "https://via.placeholder.com/300"
-                            }
-                            alt={product.title}
-                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </Link>
-
-                        <div className="absolute top-2 right-2 flex space-x-2">
-                          <button
-                            onClick={() => handleDeleteProduct(product.id)}
-                            className="p-2 bg-red-600/80 rounded-full text-white hover:bg-red-700/90 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 bg-gray-900/80 rounded-full text-gray-300 hover:text-white transition-colors">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
-                        </div>
-                        {product.status === "sold" && (
-                          <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-medium">
-                            Sold
-                          </div>
-                        )}
-                        {product.status === "pending" && (
-                          <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-medium">
-                            Pending
-                          </div>
-                        )}
-                        {product.status === "active" && (
-                          <div className="absolute top-2 left-2 bg-blue-500 text-white px-2 py-1 rounded-md text-xs font-medium">
-                            Active
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-4">
-                        <h4 className="font-semibold text-white mb-1 truncate">
-                          {product.title}
-                        </h4>
-                        <p className="text-sm text-gray-300 mb-2 line-clamp-2">
-                          {product.description}
-                        </p>
-                        <p className="text-cyan-400 font-medium mb-2">
-                          ₹{product.points?.toLocaleString() || 0}
-                        </p>
-                        <p className="text-gray-400 text-xs mb-3">
-                          {product.category}
-                        </p>
-
-                        <div className="flex items-center justify-between text-sm text-gray-400 mb-3">
-                          <div className="flex items-center space-x-4">
-                            <span className="flex items-center">
-                              <Eye className="w-3 h-3 mr-1" />
-                              {product.views || 0}
-                            </span>
-                            <span className="flex items-center">
-                              <Heart className="w-3 h-3 mr-1" />
-                              {product.likes || 0}
-                            </span>
-                            {product.rating && product.rating > 0 && (
-                              <span className="flex items-center">
-                                <Star className="w-3 h-3 mr-1 text-yellow-400" />
-                                {product.rating.toFixed(1)}
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-xs">
-                            {formatTimeAgo(product.created_at)}
-                          </span>
-                        </div>
-
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() =>
-                              router.push(`/pages/edit-product/${product.id}`)
-                            }
-                            className="flex-1 bg-gray-600 hover:bg-gray-500 text-white py-2 rounded-md text-sm transition-colors flex items-center justify-center"
-                          >
-                            <Edit className="w-4 h-4 mr-1" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => setIsLiked(!isLiked)}
-                            className={`p-2 rounded-full transition-all ${
-                              isLiked
-                                ? "bg-red-500/20 text-red-400"
-                                : "bg-slate-800 text-slate-400 hover:text-red-400"
-                            }`}
-                          >
-                            <Heart
-                              className={`w-5 h-5 ${
-                                isLiked ? "fill-current" : ""
-                              }`}
+            {activeTab === "listings" && (
+              <div>
+                {getSortedAndFilteredProducts(userProducts, true).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {getSortedAndFilteredProducts(userProducts, true).map(
+                      (product) => (
+                        <div
+                          key={product.id}
+                          className={`${themeClasses.cardBg} rounded-xl overflow-hidden border ${themeClasses.border} hover:border-cyan-500/50 transition-all group shadow-lg`}
+                        >
+                          <div className="relative">
+                            <img
+                              src={
+                                product.image_url ||
+                                "https://via.placeholder.com/300"
+                              }
+                              alt={product.title}
+                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                             />
-                          </button>
-                          <button
-                            onClick={handleShare}
-                            className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors"
-                          >
-                            <Share2 className="w-5 h-5" />
-                          </button>
-
-                           {/* Share Modal */}
-      {showShareModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-slate-900 rounded-2xl p-6 max-w-md w-full mx-4 border border-slate-800">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-white">Share Product</h3>
-              <button
-                onClick={() => setShowShareModal(false)}
-                className="text-slate-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <button
-                onClick={copyLink}
-                className="w-full flex items-center space-x-3 p-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
-              >
-                <Copy className="w-5 h-5 text-slate-400" />
-                <span className="text-white">Copy Link</span>
-              </button>
-              <button
-                onClick={() => shareToSocial('facebook')}
-                className="w-full flex items-center space-x-3 p-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-              >
-                <Facebook className="w-5 h-5 text-white" />
-                <span className="text-white">Share on Facebook</span>
-              </button>
-              <button
-                onClick={() => shareToSocial('twitter')}
-                className="w-full flex items-center space-x-3 p-3 bg-sky-600 hover:bg-sky-700 rounded-lg transition-colors"
-              >
-                <Twitter className="w-5 h-5 text-white" />
-                <span className="text-white">Share on Twitter</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-                        </div>
-
-                        {/* Additional product info */}
-                        <div className="mt-3 pt-3 border-t border-gray-600/50">
-                          <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>
-                              Created:{" "}
-                              {new Date(
-                                product.created_at
-                              ).toLocaleDateString()}
-                            </span>
-                            {product.updated_at && (
-                              <span>
-                                Updated:{" "}
-                                {new Date(
-                                  product.updated_at
-                                ).toLocaleDateString()}
-                              </span>
+                            <div className="absolute top-2 right-2 flex space-x-2">
+                              <button
+                                onClick={() => handleDeleteProduct(product.id)}
+                                className="p-2 bg-red-600/80 rounded-full text-white hover:bg-red-700/90 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                              <button className="p-2 bg-gray-900/80 rounded-full text-gray-300 hover:text-white transition-colors">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </button>
+                            </div>
+                            {product.status === "sold" && (
+                              <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                                Sold
+                              </div>
+                            )}
+                            {product.status === "pending" && (
+                              <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                                Pending
+                              </div>
+                            )}
+                            {product.status === "active" && (
+                              <div className="absolute top-2 left-2 bg-blue-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                                Active
+                              </div>
                             )}
                           </div>
+
+                          <div className="p-4">
+                            <h4
+                              className={`font-semibold ${themeClasses.text} mb-1 truncate`}
+                            >
+                              {product.title}
+                            </h4>
+                            <p
+                              className={`text-sm ${themeClasses.textSecondary} mb-2 line-clamp-2`}
+                            >
+                              {product.description}
+                            </p>
+                            <p className="text-cyan-400 font-medium mb-2">
+                              ₹{product.points?.toLocaleString() || 0}
+                            </p>
+                            <p
+                              className={`${themeClasses.textMuted} text-xs mb-3`}
+                            >
+                              {product.category}
+                            </p>
+
+                            <div
+                              className={`flex items-center justify-between text-sm ${themeClasses.textMuted} mb-3`}
+                            >
+                              <div className="flex items-center space-x-4">
+                                <span className="flex items-center">
+                                  <Eye className="w-3 h-3 mr-1" />
+                                  {product.views || 0}
+                                </span>
+                                <span className="flex items-center">
+                                  <Heart className="w-3 h-3 mr-1" />
+                                  {product.likes || 0}
+                                </span>
+                                {product.rating && product.rating > 0 && (
+                                  <span className="flex items-center">
+                                    <Star className="w-3 h-3 mr-1 text-yellow-400" />
+                                    {product.rating.toFixed(1)}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-xs">
+                                {formatTimeAgo(product.created_at)}
+                              </span>
+                            </div>
+
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() =>
+                                  console.log("Edit product", product.id)
+                                }
+                                className={`flex-1 ${themeClasses.cardBg} ${themeClasses.border} border ${themeClasses.hover} ${themeClasses.text} py-2 rounded-md text-sm transition-colors flex items-center justify-center`}
+                              >
+                                <Edit className="w-4 h-4 mr-1" />
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => setIsLiked(!isLiked)}
+                                className={`p-2 rounded-full transition-all ${
+                                  isLiked
+                                    ? "bg-red-500/20 text-red-400"
+                                    : `${themeClasses.cardBg} ${themeClasses.textMuted} hover:text-red-400`
+                                }`}
+                              >
+                                <Heart
+                                  className={`w-5 h-5 ${
+                                    isLiked ? "fill-current" : ""
+                                  }`}
+                                />
+                              </button>
+                              <button
+                                onClick={handleShare}
+                                className={`p-2 ${themeClasses.cardBg} rounded-full ${themeClasses.textMuted} hover:text-white transition-colors`}
+                              >
+                                <Share2 className="w-5 h-5" />
+                              </button>
+                            </div>
+
+                            {/* Additional product info */}
+                            <div
+                              className={`mt-3 pt-3 border-t ${themeClasses.border}`}
+                            >
+                              <div
+                                className={`flex items-center justify-between text-xs ${themeClasses.textMuted}`}
+                              >
+                                <span>
+                                  Created:{" "}
+                                  {new Date(
+                                    product.created_at
+                                  ).toLocaleDateString()}
+                                </span>
+                                {product.updated_at && (
+                                  <span>
+                                    Updated:{" "}
+                                    {new Date(
+                                      product.updated_at
+                                    ).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  )
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Package
+                      className={`w-16 h-16 ${themeClasses.textMuted} mx-auto mb-4`}
+                    />
+                    <p className={`${themeClasses.textMuted} mb-2`}>
+                      {filterStatus === "all"
+                        ? "You have no listings yet."
+                        : `No ${filterStatus} listings found.`}
+                    </p>
+                    <p className={`${themeClasses.textMuted} text-sm mb-4`}>
+                      Create your first listing to start selling on the
+                      marketplace.
+                    </p>
+                    <button
+                      onClick={() => console.log("Create listing")}
+                      className="bg-gradient-to-r from-cyan-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-cyan-600 hover:to-emerald-700 transition-all flex items-center mx-auto"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Your First Listing
+                    </button>
+                  </div>
                 )}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Package className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400 mb-2">
-                  {filterStatus === "all"
-                    ? "You have no listings yet."
-                    : `No ${filterStatus} listings found.`}
-                </p>
-                <p className="text-gray-500 text-sm mb-4">
-                  Create your first listing to start selling on the marketplace.
-                </p>
-                <button
-                  onClick={() => router.push("/pages/sell")}
-                  className="bg-gradient-to-r from-cyan-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-cyan-600 hover:to-emerald-700 transition-all flex items-center mx-auto"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Your First Listing
-                </button>
               </div>
             )}
 
@@ -1119,13 +1253,5 @@ const Dashboard = () => {
         <Footer />
       </div>
     </>
-  );
-};
-
-export default function DashboardPageWrapper(props) {
-  return (
-    <ProtectedRoute>
-      <Dashboard {...props} />
-    </ProtectedRoute>
   );
 }
