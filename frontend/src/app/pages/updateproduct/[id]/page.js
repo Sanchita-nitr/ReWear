@@ -49,6 +49,7 @@ const UpdateProductPage = () => {
     const router = useRouter();
     const params = useParams();
     const productId = params.id;
+    
 
     const [formData, setFormData] = useState({
         title: "",
@@ -72,6 +73,23 @@ const UpdateProductPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [dragActive, setDragActive] = useState(false);
+      const [stars, setStars] = useState([]);
+
+    // Generate random stars
+    useEffect(() => {
+        const generateStars = (count) => {
+            return Array.from({ length: count }, (_, i) => ({
+                id: i,
+                x: Math.random() * 100,
+                y: Math.random() * 100,
+                size: Math.random() * 1.5 + 0.5,
+                opacity: Math.random() * 0.8 + 0.2,
+                animationDelay: Math.random() * 2,
+            }));
+        };
+
+        setStars(generateStars(150));
+    }, []);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -269,6 +287,24 @@ const UpdateProductPage = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-950 to-purple-950 relative">
+              {/* Animated Star Background */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                {stars.map((star) => (
+                    <div
+                        key={star.id}
+                        className="absolute bg-white rounded-full animate-pulse"
+                        style={{
+                            left: `${star.x}%`,
+                            top: `${star.y}%`,
+                            width: `${star.size}px`,
+                            height: `${star.size}px`,
+                            opacity: star.opacity,
+                            animationDelay: `${star.animationDelay}s`,
+                        }}
+                    />
+                ))}
+            </div>
+
             <div className="relative z-10 container mx-auto px-4 py-8 max-w-5xl">
                 <h1 className="text-4xl font-bold text-white mb-8">Update Product</h1>
 

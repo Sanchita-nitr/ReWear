@@ -1,8 +1,6 @@
 "use client";
-import Footer from "@/app/components/footer/page.jsx";
-import Navbar from "@/app/components/navbar/page.jsx";
+import DashboardNavbar from "@/app/components/dashboardnavbar/page";
 import {
-  ArrowRight,
   Calendar,
   Clock,
   DollarSign,
@@ -15,15 +13,11 @@ import {
   Package,
   Plus,
   RefreshCw,
-  Search,
   Share2,
   ShoppingBag,
   Star,
   Trash2,
-  TrendingUp,
-  Moon,
-  Sun,
-  Boxes
+  TrendingUp
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -33,7 +27,6 @@ export default function Dashboard() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
-  const [products, setProducts] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [userProducts, setUserProducts] = useState([]);
@@ -98,31 +91,31 @@ export default function Dashboard() {
     };
   }, []);
 
-  // const handleLikeProduct = async (productId) => {
-  //   try {
-  //     const res = await fetch(`${API_BASE_URL}/items/items/${productId}/like/`, {
-  //       method: "POST",
-  //       headers: getAuthHeaders(),
-  //     });
-  //     if (res.ok) {
-  //       // Toggle liked state locally
-  //       setLikedProductIds((prev) => {
-  //         const newSet = new Set(prev);
-  //         if (newSet.has(productId)) {
-  //           newSet.delete(productId);
-  //         } else {
-  //           newSet.add(productId);
-  //         }
-  //         return newSet;
-  //       });
-  //       await refreshData();
-  //     } else {
-  //       console.error("Failed to like/unlike product");
-  //     }
-  //   } catch (err) {
-  //     console.error("Failed to like/unlike product:", err);
-  //   }
-  // };
+  const handleLikeProduct = async (productId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/items/items/${productId}/like/`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        // Toggle liked state locally
+        setLikedProductIds((prev) => {
+          const newSet = new Set(prev);
+          if (newSet.has(productId)) {
+            newSet.delete(productId);
+          } else {
+            newSet.add(productId);
+          }
+          return newSet;
+        });
+        await refreshData();
+      } else {
+        console.error("Failed to like/unlike product");
+      }
+    } catch (err) {
+      console.error("Failed to like/unlike product:", err);
+    }
+  };
 
   // Fetch user profile and stats
   const fetchUserProfile = useCallback(async () => {
@@ -190,7 +183,6 @@ export default function Dashboard() {
     const soldListings = userProducts.filter((p) => p.status === "sold").length;
 
     const totalViews = userProducts.reduce((sum, p) => sum + (p.views || 0), 0);
-    const totalLikes = userProducts.reduce((sum, p) => sum + (p.likes || 0), 0);
     const totalEarnings = userProducts
       .filter((p) => p.status === "sold")
       .reduce((sum, p) => sum + (p.points || 0), 0);
@@ -199,7 +191,7 @@ export default function Dashboard() {
     const averageRating =
       ratedProducts.length > 0
         ? ratedProducts.reduce((sum, p) => sum + p.rating, 0) /
-          ratedProducts.length
+        ratedProducts.length
         : 0;
 
     return {
@@ -207,7 +199,6 @@ export default function Dashboard() {
       activeListings,
       soldListings,
       totalViews,
-      totalLikes,
       totalEarnings,
       averageRating: averageRating.toFixed(1),
       marketplaceItems: allProducts.length,
@@ -277,59 +268,13 @@ export default function Dashboard() {
     const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffHours < 1) return "Just now";
-    if (diffHours < 24)
-      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-    return new Date(date).toLocaleDateString();
+    if (diffHours < 1) { return "Just now" };
+    if (diffHours < 24) {
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`
+    };
+    if (diffDays < 7) { return `${diffDays} day${diffDays > 1 ? "s" : ""} ago` };
+    { return new Date(date).toLocaleDateString() };
   };
-
-  const handleLikeProduct = async (productId) => {
-    try {
-      const res = await fetch(
-        `${API_BASE_URL}/items/items/${productId}/like/`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(),
-        }
-      );
-      if (res.ok) {
-        await refreshData();
-      }
-    } catch (err) {
-      console.error("Failed to like product:", err);
-    }
-  };
-
-  // const handleViewProduct = async (productId) => {
-  //   try {
-  //     await fetch(`${API_BASE_URL}/items/items/${productId}/view/`, {
-  //       method: "POST",
-  //       headers: getAuthHeaders(),
-  //     });
-  //     await refreshData();
-  //   } catch (err) {
-  //     console.error("Failed to record view:", err);
-  //   }
-  // };
-
-  //  const handleRateProduct = async (productId, rating) => {
-  //   try {
-  //     const res = await fetch(
-  //       `${API_BASE_URL}/items/items/${productId}/rate/`,
-  //       {
-  //         method: "POST",
-  //         headers: getAuthHeaders(),
-  //         body: JSON.stringify({ rating }),
-  //       }
-  //     );
-  //     if (res.ok) {
-  //       await refreshData();
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to rate product:");
-  //   }
-  // };
 
   const handleDeleteProduct = async (productId) => {
     const token = localStorage.getItem("token");
@@ -425,24 +370,12 @@ export default function Dashboard() {
       setRecentActivity(activity);
     }
   }, [userProducts, allProducts, calculateStats, generateRecentActivity]);
-  
+
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     router.push("/");
-  };
-
-
-    useEffect(() => {
-    // Optional: check system preference
-    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setIsDarkMode(systemDark);
-  }, []);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle("dark", !isDarkMode);
   };
 
   // Theme classes (simplified as Tailwind's dark mode utility classes will handle most of it)
@@ -460,14 +393,10 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div
-        className={`min-h-screen ${themeClasses.bg} flex items-center justify-center`}
-      >
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-          <p className={`${themeClasses.textMuted} text-lg`}>
-            Loading your dashboard...
-          </p>
+      <div className="flex justify-center items-center min-h-screen bg-slate-950">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-slate-700 border-t-indigo-500"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-indigo-500 rounded-full opacity-20 animate-pulse"></div>
         </div>
       </div>
     );
@@ -498,71 +427,16 @@ export default function Dashboard() {
       <div
         className={`min-h-screen ${themeClasses.bg} transition-colors duration-300`}
       >
-        <Navbar />
+        <DashboardNavbar />
 
         {/* Main Content */}
         <div className="pt-20">
           {/* Header Section */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-              {/* User Profile Card */}
-              <div
-                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg backdrop-blur-sm`}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-xl">
-                        {user.firstName?.charAt(0) || ""}
-                        {user.lastName?.charAt(0) || ""}
-                      </span>
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
-                  </div>
-                  <div>
-                    <h2
-                      className={`${themeClasses.text} text-xl font-semibold`}
-                    >
-                      {user.firstName} {user.lastName}
-                    </h2>
-                    <p className={`${themeClasses.textSecondary} text-sm`}>
-                      {user.email}
-                    </p>
-                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
-                      Member since{" "}
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               {/* Action Buttons */}
               <div className="flex items-center space-x-4">
-                <button
-                  onClick={toggleDarkMode}
-                  className={`p-3 ${themeClasses.cardBg} ${themeClasses.border} border rounded-lg ${themeClasses.hover} transition-colors`}
-                >
-                  {isDarkMode ? (
-                    <Sun className="w-5 h-5 text-yellow-500" />
-                  ) : (
-                    <Moon className="w-5 h-5 text-gray-700" />
-                  )}
-                </button>
-
-                <button
-                  onClick={refreshData}
-                  disabled={refreshing}
-                  className={`flex items-center px-4 py-2 ${themeClasses.cardBg} ${themeClasses.border} border rounded-lg ${themeClasses.hover} transition-colors`}
-                >
-                  <RefreshCw
-                    className={`w-4 h-4 mr-2 ${
-                      refreshing ? "animate-spin" : ""
-                    }`}
-                  />
-                  <span className={themeClasses.text}>
-                    {refreshing ? "Refreshing..." : "Refresh"}
-                  </span>
-                </button>
+               
 
                 <button
                   onClick={() => router.push("/pages/sell")}
@@ -583,110 +457,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div
-                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p
-                      className={`${themeClasses.textMuted} text-sm font-medium`}
-                    >
-                      Active Listings
-                    </p>
-                    <p
-                      className={`${themeClasses.text} text-3xl font-bold mt-2`}
-                    >
-                      {stats.activeListings || 0}
-                    </p>
-                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
-                      of {stats.totalListings || 0} total
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                    <ShoppingBag className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p
-                      className={`${themeClasses.textMuted} text-sm font-medium`}
-                    >
-                      Total Views
-                    </p>
-                    <p
-                      className={`${themeClasses.text} text-3xl font-bold mt-2`}
-                    >
-                      {stats.totalViews || 0}
-                    </p>
-                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
-                      across all listings
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
-                    <Eye className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p
-                      className={`${themeClasses.textMuted} text-sm font-medium`}
-                    >
-                      Total Likes
-                    </p>
-                    <p
-                      className={`${themeClasses.text} text-3xl font-bold mt-2`}
-                    >
-                      {stats.totalLikes || 0}
-                    </p>
-                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
-                      Rating: {stats.averageRating || 0}★
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg flex items-center justify-center">
-                    <Heart className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p
-                      className={`${themeClasses.textMuted} text-sm font-medium`}
-                    >
-                      Total Earnings
-                    </p>
-                    <p
-                      className={`${themeClasses.text} text-3xl font-bold mt-2`}
-                    >
-                      ₹{stats.totalEarnings?.toLocaleString() || 0}
-                    </p>
-                    <p className={`${themeClasses.textMuted} text-xs mt-1`}>
-                      {stats.soldListings || 0} items sold
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          
 
           {/* Navigation Tabs */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
@@ -719,11 +490,10 @@ export default function Dashboard() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-all font-medium ${
-                      activeTab === tab.id
-                        ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
-                        : `${themeClasses.text} ${themeClasses.hover}`
-                    }`}
+                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-all font-medium ${activeTab === tab.id
+                      ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
+                      : `${themeClasses.text} ${themeClasses.hover}`
+                      }`}
                   >
                     {tab.icon}
                     <span>{tab.label}</span>
@@ -782,58 +552,6 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div
-                  className={`${themeClasses.cardBg} rounded-2xl p-6 ${themeClasses.border} border shadow-lg`}
-                >
-                  <h3
-                    className={`${themeClasses.text} text-xl font-semibold mb-6`}
-                  >
-                    Quick Actions
-                  </h3>
-                  <div className="space-y-4">
-                    <button
-                      onClick={() => router.push("/pages/sell")}
-                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-purple-300 dark:border-purple-700 ${themeClasses.hover} transition-all group`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Plus className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-                        <span className={`${themeClasses.text} font-medium`}>
-                          Create New Listing
-                        </span>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:translate-x-1 transition-transform" />
-                    </button>
-
-                    <button
-                      onClick={() => setActiveTab("marketplace")}
-                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-blue-300 dark:border-blue-700 ${themeClasses.hover} transition-all group`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Search className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                        <span className={`${themeClasses.text} font-medium`}>
-                          Browse Marketplace
-                        </span>
-                      </div>
-                      <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
-                        {stats.marketplaceItems || 0} items
-                      </span>
-                    </button>
-
-                    <button
-                      onClick={() => setActiveTab("activity")}
-                      className={`w-full flex items-center justify-between p-4 rounded-lg border-2 border-dashed border-emerald-300 dark:border-emerald-700 ${themeClasses.hover} transition-all group`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <TrendingUp className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                        <span className={`${themeClasses.text} font-medium`}>
-                          View Analytics
-                        </span>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </div>
-                </div>
               </div>
             )}
             {activeTab === "listings" && (
@@ -939,16 +657,14 @@ export default function Dashboard() {
                               </button>
                               <button
                                 onClick={() => setIsLiked(!isLiked)}
-                                className={`p-2 rounded-full transition-all ${
-                                  likedProductIds.has(product.id)
-                                    ? "bg-red-500/20 text-red-400"
-                                    : `${themeClasses.cardBg} ${themeClasses.textMuted} hover:text-red-400`
-                                }`}
+                                className={`p-2 rounded-full transition-all ${likedProductIds.has(product.id)
+                                  ? "bg-red-500/20 text-red-400"
+                                  : `${themeClasses.cardBg} ${themeClasses.textMuted} hover:text-red-400`
+                                  }`}
                               >
                                 <Heart
-                                  className={`w-5 h-5 ${
-                                    likedProductIds.has(product.id) ? "fill-current" : ""
-                                  }`}
+                                  className={`w-5 h-5 ${likedProductIds.has(product.id) ? "fill-current" : ""
+                                    }`}
                                 />
                               </button>
                               <button
@@ -1020,18 +736,7 @@ export default function Dashboard() {
                     <Clock className="w-5 h-5 mr-2" />
                     Activity History
                   </h3>
-                  <button
-                    onClick={refreshData}
-                    disabled={refreshing}
-                    className="flex items-center text-gray-400 hover:text-white transition-colors"
-                  >
-                    <RefreshCw
-                      className={`w-4 h-4 mr-2 ${
-                        refreshing ? "animate-spin" : ""
-                      }`}
-                    />
-                    {refreshing ? "Refreshing..." : "Refresh"}
-                  </button>
+
                 </div>
 
                 <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -1093,9 +798,8 @@ export default function Dashboard() {
                       className="flex items-center text-gray-400 hover:text-white transition-colors"
                     >
                       <RefreshCw
-                        className={`w-4 h-4 mr-2 ${
-                          refreshing ? "animate-spin" : ""
-                        }`}
+                        className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""
+                          }`}
                       />
                       {refreshing ? "Refreshing..." : "Refresh"}
                     </button>
@@ -1108,7 +812,7 @@ export default function Dashboard() {
                       <div
                         key={product.id}
                         className="bg-gray-700/30 rounded-xl overflow-hidden border border-gray-600/50 hover:border-cyan-500/50 transition-all group cursor-pointer"
-                        onClick={() => handleViewProduct(product.id)}
+                        onClick={() => router.push(`/pages/productdetails/${product.id}`)}
                       >
                         <div className="relative">
                           <img
@@ -1238,9 +942,8 @@ export default function Dashboard() {
                     className="flex items-center text-gray-400 hover:text-white transition-colors"
                   >
                     <RefreshCw
-                      className={`w-4 h-4 mr-2 ${
-                        refreshing ? "animate-spin" : ""
-                      }`}
+                      className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""
+                        }`}
                     />
                     {refreshing ? "Refreshing..." : "Refresh"}
                   </button>
@@ -1258,8 +961,6 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-
-        <Footer />
       </div>
     </>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    ArrowLeft,
     BookOpen,
     Calendar,
     Camera,
@@ -158,7 +159,7 @@ const SellPage = () => {
                 setSuccessMessage("Item created successfully.");
                 console.log("Item created:", data);
                 router.push("/pages/dashboard");
-  
+
                 if (imageFile) {
                     await uploadImage(data.id);
                 } else {
@@ -181,12 +182,12 @@ const SellPage = () => {
 
     const uploadImage = async (itemIdToUse = null) => {
         const targetItemId = itemIdToUse || itemId;
-        
+
         if (!imageFile || !targetItemId) {
             setError("Please select an image and create an item first.");
             return;
         }
-        
+
         setError("");
         setSuccessMessage("");
         setIsUploadingImage(true);
@@ -260,6 +261,14 @@ const SellPage = () => {
 
             {/* Floating Accent Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="flex items-center justify-center mb-6">
+                    <button
+                        onClick={() => router.push("/pages/dashboard")}
+                        className="absolute left-4 top-8 p-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
+                    >
+                        <ArrowLeft className="w-6 h-6" />
+                    </button>
+                </div>
                 <div className="absolute top-20 left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-xl animate-pulse" />
                 <div className="absolute top-60 right-20 w-24 h-24 bg-blue-500/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: "1s" }} />
                 <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: "2s" }} />
@@ -405,7 +414,7 @@ const SellPage = () => {
                                     {/* Gender */}
                                     <div className="space-y-2">
                                         <label className="text-white font-semibold text-lg flex items-center">
-                                            <User  className="w-5 h-5 mr-2 text-blue-400" />
+                                            <User className="w-5 h-5 mr-2 text-blue-400" />
                                             Gender
                                         </label>
                                         <select

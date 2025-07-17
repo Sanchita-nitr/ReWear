@@ -43,8 +43,6 @@ const imageRef = useRef(null);
   const [startX, setStartX] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [user, setUser] = useState(null);
-
-  // Missing state variables added
   const [refreshing, setRefreshing] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -53,6 +51,7 @@ const imageRef = useRef(null);
   const [showContactModal, setShowContactModal] = useState(false);
   const [message, setMessage] = useState('');
   const [hasUserPurchased, setHasUserPurchased] = useState(false);
+
 
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem("token");

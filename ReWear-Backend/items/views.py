@@ -53,3 +53,15 @@ class LikedItemsList(APIView):
         liked_items = Item.objects.filter(likes__user=request.user)
         serializer = ItemSerializer(liked_items, many=True)
         return Response(serializer.data)
+
+class UserProductStatsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        total_created = Item.objects.filter(uploaded_by=user).count()
+        total_sold = Item.objects.filter(uploaded_by=user, status__in=['swapped', 'redeemed']).count()
+        return Response({
+            'total_products_created': total_created,
+            'total_products_sold': total_sold,
+        })
